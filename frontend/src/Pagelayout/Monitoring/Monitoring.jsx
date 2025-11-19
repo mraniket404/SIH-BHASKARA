@@ -5,10 +5,11 @@ import AssetHealthPanel from './AssetHealthPanel'
 import EquipmentMonitor from './EquipmentMonitor'
 import PerformanceAnalytics from './PerformanceAnalytics'
 import SensorGrid from './SensorGrid'
+import SCADADashboard from './SCADADashboard'
 
 const Monitoring = () => {
   const [lastUpdateTime, setLastUpdateTime] = useState(new Date())
-  const [selectedView, setSelectedView] = useState('overview')
+  const [selectedView, setSelectedView] = useState('scada')
   const [isLoading, setIsLoading] = useState(false)
   const [refreshInterval, setRefreshInterval] = useState(5000)
 
@@ -22,30 +23,19 @@ const Monitoring = () => {
   }, [refreshInterval])
 
   const views = [
+    { id: 'scada', name: 'SCADA View', icon: '⚡', description: 'Real-time SCADA Dashboard' },
     { id: 'overview', name: 'Overview', icon: '🏠', description: 'System-wide monitoring overview' },
     { id: 'assets', name: 'Assets', icon: '🔧', description: 'Detailed asset monitoring' },
     { id: 'performance', name: 'Performance', icon: '📈', description: 'Performance analytics' },
-    { id: 'sensors', name: 'Sensors', icon: '📊', description: 'Real-time sensor data' },
-    { id: 'analytics', name: 'Analytics', icon: '🔍', description: 'Advanced analytics' }
+    { id: 'sensors', name: 'Sensors', icon: '📊', description: 'Real-time sensor data' }
   ]
 
   const handleRefresh = () => {
     setIsLoading(true)
-    // Simulate API call
     setTimeout(() => {
       setLastUpdateTime(new Date())
       setIsLoading(false)
     }, 1000)
-  }
-
-  const handleExportData = () => {
-    // Simulate export functionality
-    alert('Exporting monitoring data...')
-  }
-
-  const handleConfigureAlerts = () => {
-    // Simulate alert configuration
-    alert('Opening alert configuration...')
   }
 
   const getCurrentView = () => {
@@ -61,11 +51,11 @@ const Monitoring = () => {
           <div className="flex-1">
             <div className="flex items-center space-x-4">
               <div className="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-xl">
-                <span className="text-white text-xl">📡</span>
+                <span className="text-white text-xl">⚡</span>
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-white mb-2">
-                  Real-time Asset Monitoring
+                  SCADA Real-time Monitoring
                 </h1>
                 <p className="text-gray-300 text-lg">
                   {getCurrentView().description}
@@ -78,14 +68,13 @@ const Monitoring = () => {
             <div className="text-right">
               <div className="flex items-center space-x-2 text-green-400 mb-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-semibold">Live Monitoring</span>
+                <span className="font-semibold">Live Data</span>
               </div>
               <p className="text-gray-400 text-sm">
                 Updated {lastUpdateTime.toLocaleTimeString()}
               </p>
             </div>
             
-            {/* Action Buttons */}
             <div className="flex space-x-2">
               <button
                 onClick={handleRefresh}
@@ -99,43 +88,25 @@ const Monitoring = () => {
                 )}
                 <span>Refresh</span>
               </button>
-              
-              <button
-                onClick={handleExportData}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center space-x-2"
-              >
-                <span>📥</span>
-                <span>Export</span>
-              </button>
-              
-              <button
-                onClick={handleConfigureAlerts}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors flex items-center space-x-2"
-              >
-                <span>⚙️</span>
-                <span>Alerts</span>
-              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* View Selector with Enhanced UI */}
+      {/* View Selector */}
       <div className="glass rounded-xl p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-white">Monitoring Views</h3>
-          <div className="flex items-center space-x-3">
-            <select
-              value={refreshInterval}
-              onChange={(e) => setRefreshInterval(Number(e.target.value))}
-              className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-white text-sm"
-            >
-              <option value={1000}>1s Update</option>
-              <option value={3000}>3s Update</option>
-              <option value={5000}>5s Update</option>
-              <option value={10000}>10s Update</option>
-            </select>
-          </div>
+          <select
+            value={refreshInterval}
+            onChange={(e) => setRefreshInterval(Number(e.target.value))}
+            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-white text-sm"
+          >
+            <option value={1000}>1s Update</option>
+            <option value={3000}>3s Update</option>
+            <option value={5000}>5s Update</option>
+            <option value={10000}>10s Update</option>
+          </select>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -163,9 +134,6 @@ const Monitoring = () => {
               `}>
                 {view.name}
               </div>
-              <div className="text-xs text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                {view.description}
-              </div>
             </button>
           ))}
         </div>
@@ -183,6 +151,10 @@ const Monitoring = () => {
 
       {/* Main Content */}
       <div className="space-y-6">
+        {selectedView === 'scada' && (
+          <SCADADashboard />
+        )}
+
         {selectedView === 'overview' && (
           <>
             <AssetMetrics />
@@ -209,40 +181,6 @@ const Monitoring = () => {
         {selectedView === 'sensors' && (
           <SensorGrid detailed={true} />
         )}
-
-        {selectedView === 'analytics' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PerformanceAnalytics />
-            <AssetHealthPanel />
-          </div>
-        )}
-      </div>
-
-      {/* Quick Actions Footer */}
-      <div className="glass rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 text-sm text-gray-400">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>System Status: Operational</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span>📊</span>
-              <span>24 Assets • 22 Online</span>
-            </div>
-          </div>
-          
-          <div className="flex space-x-2">
-            <button className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center space-x-2">
-              <span>📋</span>
-              <span>Generate Report</span>
-            </button>
-            <button className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm flex items-center space-x-2">
-              <span>🔔</span>
-              <span>View Alerts</span>
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   )

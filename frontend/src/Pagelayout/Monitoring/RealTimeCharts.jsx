@@ -1,35 +1,32 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const RealTimeCharts = () => {
   const [chartData, setChartData] = useState({
     voltage: Array(20).fill(0).map(() => Math.random() * 10 + 395),
     current: Array(20).fill(0).map(() => Math.random() * 200 + 1100),
+    frequency: Array(20).fill(0).map(() => Math.random() * 0.2 + 49.9),
     temperature: Array(20).fill(0).map(() => Math.random() * 10 + 60)
   })
   
   const [selectedChart, setSelectedChart] = useState('voltage')
-  const [isPaused, setIsPaused] = useState(false)
-  const [timeRange, setTimeRange] = useState('5m')
-
-  const chartRef = useRef(null)
 
   useEffect(() => {
-    if (isPaused) return
-
     const interval = setInterval(() => {
       setChartData(prev => ({
         voltage: [...prev.voltage.slice(1), Math.random() * 10 + 395],
         current: [...prev.current.slice(1), Math.random() * 200 + 1100],
+        frequency: [...prev.frequency.slice(1), Math.random() * 0.2 + 49.9],
         temperature: [...prev.temperature.slice(1), Math.random() * 10 + 60]
       }))
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [isPaused])
+  }, [])
 
   const charts = [
     { id: 'voltage', name: 'Voltage', unit: 'kV', color: 'blue', min: 390, max: 410 },
     { id: 'current', name: 'Current', unit: 'A', color: 'green', min: 1000, max: 1400 },
+    { id: 'frequency', name: 'Frequency', unit: 'Hz', color: 'purple', min: 49.8, max: 50.2 },
     { id: 'temperature', name: 'Temperature', unit: '°C', color: 'red', min: 55, max: 75 }
   ]
 
@@ -84,60 +81,10 @@ const RealTimeCharts = () => {
     )
   }
 
-  const handleExportChart = () => {
-    alert(`Exporting ${selectedChart} chart data...`)
-  }
-
-  const handleFullscreen = () => {
-    if (chartRef.current) {
-      chartRef.current.requestFullscreen?.()
-    }
-  }
-
   return (
-    <div ref={chartRef} className="glass rounded-xl p-6">
+    <div className="glass rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold text-white">Real-time Monitoring Charts</h3>
-        
-        <div className="flex items-center space-x-3">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1 text-white text-sm"
-          >
-            <option value="1m">Last 1 min</option>
-            <option value="5m">Last 5 min</option>
-            <option value="15m">Last 15 min</option>
-            <option value="1h">Last 1 hour</option>
-          </select>
-
-          <button
-            onClick={() => setIsPaused(!isPaused)}
-            className={`px-3 py-1 rounded-lg text-sm flex items-center space-x-2 ${
-              isPaused 
-                ? 'bg-yellow-600 hover:bg-yellow-700 text-white' 
-                : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
-          >
-            <span>{isPaused ? '▶' : '⏸'}</span>
-            <span>{isPaused ? 'Resume' : 'Pause'}</span>
-          </button>
-
-          <button
-            onClick={handleExportChart}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm flex items-center space-x-2"
-          >
-            <span>📥</span>
-            <span>Export</span>
-          </button>
-
-          <button
-            onClick={handleFullscreen}
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm"
-          >
-            <span>⛶</span>
-          </button>
-        </div>
+        <h3 className="text-xl font-semibold text-white">Real-time Parameters</h3>
       </div>
 
       {/* Chart Selector */}
@@ -159,36 +106,6 @@ const RealTimeCharts = () => {
 
       {/* Main Chart */}
       {renderChart()}
-
-      {/* Chart Statistics */}
-      <div className="grid grid-cols-3 gap-4 mt-6">
-        {charts.map(chart => {
-          const data = chartData[chart.id]
-          const current = data[data.length - 1]
-          const avg = data.reduce((a, b) => a + b, 0) / data.length
-          
-          return (
-            <div
-              key={chart.id}
-              onClick={() => setSelectedChart(chart.id)}
-              className={`bg-gray-800 rounded-lg p-3 cursor-pointer transition-all duration-300 ${
-                selectedChart === chart.id ? `border-l-4 border-${chart.color}-500` : 'hover:bg-gray-700'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-400">{chart.name}</span>
-                <div className={`w-2 h-2 bg-${chart.color}-500 rounded-full`}></div>
-              </div>
-              <div className="text-lg font-bold text-white mt-1">
-                {current.toFixed(1)} {chart.unit}
-              </div>
-              <div className="text-xs text-gray-400">
-                Avg: {avg.toFixed(1)} {chart.unit}
-              </div>
-            </div>
-          )
-        })}
-      </div>
     </div>
   )
 }
